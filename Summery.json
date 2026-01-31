@@ -1,0 +1,120 @@
+{
+  "name": "Summery",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "eb25416f-8b64-42a7-a659-63b954595970",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/kesinee-bo/4613249_DataScience/refs/heads/main/16_LinearRegression.md",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4a93ade0-7fbc-47f7-821f-73aea7d8c3fe",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=สรุปเนื้อหาจากที่ให้ไปให้เหลือไม่เกิน 1000 คำ\n\n{{ $json.data }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "e7838f2e-2e1a-4135-a91c-2d742a9b330f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "05707292-c967-44ee-a1ce-431b3dea2c9e",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "K6OUzfSwRYWNf25l",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "AI Agent": [
+      {
+        "json": {
+          "output": "**การถดถอยเชิงเส้น (Linear Regression)**  \nเป็นวิธีแสดงความสัมพันธ์เชิงเส้นระหว่างตัวแปรอิสระ (Predictor) กับตัวแปรตาม (Response) โดยสร้างสมการเส้นตรง  \n\\[\n\\widehat{Y}=b_0+b_1X_1+\\dots + b_kX_k\n\\]  \nสำหรับ Linear Regression รายการเดียว (Simple) มีเพียง \\(X\\) หนึ่งตัวและโมเดลคือ \\(\\widehat{Y}=b_0+b_1X\\).\n\n---\n\n### คำศัพท์พื้นฐาน\n| คำ | ความหมาย |\n|-----|-----------|\n| ตัวแปรอิสระ | Input ของโมเดล (Predictor) |\n| ตัวแปรตาม | Output ที่ต้องการทำนาย (Response) |\n| ความชัน \\(b_1\\) | ผลกระทบต่อ Y เมื่อ X เพิ่ม 1 หน่วย |\n| จุดตัดแกน \\(b_0\\) | ค่าคงที่เมื่อ X = 0 |\n| ค่าคลาดเคลื่อน \\(e_i = Y_i-\\widehat{Y_i}\\) | ความต่างระหว่างค่าเป็นจริงกับค่าทำนาย |\n| เส้นที่เหมาะสมที่สุด | เส้นที่ทำให้ผลรวมกำลังสองของคลาดเคลื่อน \\(\\sum e_i^2\\) ต่ำสุด (OLS) |\n| R² | ค่าสัมประสิทธิ์การกำหนด (0–1) แสดงความสัมพันธ์/อธิบายความแปรผันของ Y |\n\n---\n\n### วิธีหาค่าพารามิเตอร์ (OLS)\n\\[\n\\min_{b_0,b_1}\\sum_{i=1}^n (Y_i-b_0-b_1X_i)^2\n\\]\nได้สูตรแก้แบบเดิม:  \n\\(b_1 = \\frac{\\text{cov}(X,Y)}{\\text{var}(X)}\\);  \n\\(b_0 = \\bar{Y}-b_1\\bar{X}\\).\n\n---\n\n### ตัวอย่าง Python – ศึกษาข้อมูล “ชั่วโมงอ่านหนังสือ → คะแนนสอบ”\n```python\nimport numpy as np, pandas as pd, matplotlib.pyplot as plt\nfrom sklearn.linear_model import LinearRegression\n\nnp.random.seed(42)\nX = np.random.rand(50)*12                  # ชั่วโมงอ่าน 0–12h\nnoise = np.random.normal(0,5,50)\nY = 30 + 5*X + noise                       # สร้างคะแนนสอบ\n\ndf = pd.DataFrame({'Hours':X,'Score':Y})\n```\n*กราฟ scatter* แสดงแนวโน้มบวก  \n```python\nplt.scatter(df['Hours'], df['Score'])\n```\n*สร้างโมเดล*  \n```python\nXd = df[['Hours']]\nyd = df['Score']\nm = LinearRegression().fit(Xd, yd)\nprint(m.coef_[0], m.intercept_)\n```\nค่าที่ได้: \\(b_1≈4.9,\\, b_0≈30.5\\) — ประมาณสมการที่ใช้สร้างข้อมูล  \n*ประเมิน*  \n```python\nr2 = m.score(Xd, yd)            # R^2 ≈ 0.93\n```\n*ทำนาย*  \n```python\npred = m.predict([[8]])          # 8h → ≈69.7 คะแนน\n```\n\n---\n\n### ตัวอย่างสําหรับงานจริง – “Body Measurements”\n\n#### 1. โหลดและตรวจสอบข้อมูล\n```python\ndf = pd.read_csv('bdims.csv')\ndf = df[['sex','age','wgt','hgt','hip_gi','wai_gi']]\ndf.columns = ['sex','age','weight','height','hip','waist']\ndf['bmi'] = df['weight']/(df['height']/100)**2\n```\n*สรุปสถิติ* แสดงค่าเฉลี่ย–ความแปรปรวน, `df.corr()` → ความสัมพันธ์หัวใจ, `hip` และ `bmi` ควรมีสัมประสิทธิ์บวกสูงกับ `waist`.\n\n#### 2. สร้างโมเดล (Multiple Linear Regression)\n```python\nfrom sklearn.model_selection import train_test_split, GridSearchCV\nX = df[['sex','age','weight','height','hip','bmi']]\ny = df['waist']\nX_train, X_test, y_train, y_test = train_test_split(X,y, test_size=0.2, random_state=42)\n\nparam_grid = {'fit_intercept':[True,False],'positive':[True,False]}\ngrid = GridSearchCV(LinearRegression(), param_grid, cv=5)\ngrid.fit(X_train,y_train)\nmodel = grid.best_estimator_\n```\nสมการที่ได้ (ตัวอย่างเพื่อตีความ)  \n```\nwaist = 28.5 –0.93*sex –0.027*age +0.17*weight –0.15*height +0.38*hip +1.02*bmi\n```\n*ค่า \\(R^2≈0.83\\), MSE≈1.5 cm²*\n\n#### 3. ทดสอบบน test set\n```python\nfrom sklearn.metrics import r2_score, mean_squared_error\ny_pred = model.predict(X_test)\nprint(r2_score(y_test,y_pred), mean_squared_error(y_test,y_pred))\n```\nกราฟ “Actual vs Predicted” แสดงข้อมูลเกือบติดกับเส้นตรง `y=x` – โมเดลทำงานได้ดี.\n\n#### 4. ทำนายคำตอบใหม่\n```python\nnew = pd.DataFrame({'sex':[0,1],'age':[25,30],\n                    'weight':[70,80],'height':[175,180],'hip':[95,100]})\nnew['bmi'] = new['weight']/(new['height']/100)**2\nmodel.predict(new)          # ค่ารอบเอวประมาณ 74–80 cm\n```\n\n#### 5. บันทึก‑โหลดโมเดล\n```python\nimport joblib\njoblib.dump(model,'waist_size_model.pkl')\nmodel_loaded = joblib.load('waist_size_model.pkl')\n```\n\n#### 6. ทำ API ด้วย Flask + ngrok (สำหรับ deploy)\n```python\nfrom flask import Flask, request, jsonify\nfrom pyngrok import ngrok\napp = Flask(__name__)\nmodel = joblib.load('/content/waist_size_model.pkl')\n\n@app.route('/predict', methods=['POST'])\ndef predict():\n    data = request.get_json()\n    df = pd.DataFrame([data])\n    pred = model.predict(df)[0]\n    return jsonify({'predicted_waist': float(pred)})\n\nif __name__=='__main__':\n    ngrok.set_auth_token('YOUR_TOKEN')\n    public_url = ngrok.connect(5000)\n    app.run(port=5000)\n```\nส่ง JSON (`sex, age, weight, height, hip, bmi`) → ได้ผลลัพธ์ `predicted_waist`.\n\n#### 7. หน้าเว็บตัวอย่าง (HTML+JS)\nโค้ด HTML‑JS บันทึกในไฟล์ `index.html` ใช้ `fetch()` ส่งค่าไปยัง API บน ngrok และแสดงผล `Predicted Waist Size` พร้อมคำนวณ BMI บนฝั่ง client.\n\n---\n\n### การบ้าน – Predict used‑car price  \n(ใช้ข้อมูลจาก Kaggle “used car price prediction”)  \nสร้างโมเดล Linear Regression เพื่อทำนาย `Resale Value` โดยใช้ฟีเจอร์เช่น ปีผลิต, ระยะทางเดิน, ประเภทเชื้อเพลิง, ขนาดเครื่องยนต์ ฯลฯ  \nขั้นตอนหลัก:  \n1. โหลดข้อมูล → แยกค่าว่าง/ข้อมูลผิดพลาด  \n2. แปลงตัวแปรเช่น `Fuel type` → ดัชนี (One‑Hot)  \n3. แบ่ง train/test → Train โมเดล (`LinearRegression`, `Ridge`, `Lasso`)  \n4. ประเมินด้วย R², MSE, MAE  \n5. แสดงผลรวมและตั้งค่า threshold เกรดของราคาขาย  \n6. (แนะนำ) Deploy ที่คลาวด์หรือ Flask + ngrok เช่นตัวอย่างด้านบน\n\n> หมายเหตุ: บทความนี้ช่วยแนะนำวิธีทำ Linear Regression เบื้องต้นจนถึงการเตรียมโมเดลให้พร้อมใช้งานจริง.  \n"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "02c89e30-7625-4631-8c0f-a584bdd1ea6f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6eab26b7abdd3802d32d44c3534d2ca2bd1967bbbb8104abf74493d13a567124"
+  },
+  "id": "hzqArolOlinl4k9W",
+  "tags": []
+}

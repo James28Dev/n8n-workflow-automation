@@ -1,0 +1,262 @@
+{
+  "name": "Line Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "line-webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f17f101c-4f04-4528-8a45-ca16d225a509",
+      "name": "Webhook",
+      "webhookId": "ec150f3a-b91d-4cbf-b1d5-0cb1b74fb710"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.events[0].message.text }}",
+        "options": {
+          "systemMessage": "คุณผู้ช่วยตอบคำถามเกี่ยวกับกำหนดการต่าง ๆ ที่อยู่ใน event data ถ้าผู้ใช้งานถามเกี่ยว event data ให้แสดงข้อมูลของ event นั้น โดยใช้ date ซึ่งเห็นวันที่ตามกำหนดการนั้นซึ่งเก็บในรูปแบบ MM/dd/yyyy"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "750e6820-ae02-4891-a37b-f90bf0612212",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        144,
+        208
+      ],
+      "id": "81b6c454-5825-408e-aac6-181808eb46e3",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "rXD7z0bI9gw51XeR",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.events[0].source.userId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        208
+      ],
+      "id": "212b21a6-b49c-441c-9f0e-f724c4893b8d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM",
+          "mode": "list",
+          "cachedResultName": "events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        208
+      ],
+      "id": "31f61c3f-12e5-45f2-9c14-95473795e41c",
+      "name": "Event Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GhlFllPfjRrN60Vn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer zJ4d34kbTLbYYLe+zQgsM1NA2+HXsmrZdO6B+PoqzLFhJksiR50/+bckxpKbOZq/jkWXIoldP5bzRPmGJnr4HDUiL6tjfrWYJpnR7W0blMeb9A9o0nn7OkdPb4+1a3TnfyHQSVLjGjTB9BiLeMOvTgdB04t89/1O/w1cDnyilFU="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"replyToken\":{{ $('Webhook').item.json.body.events[0].replyToken.toJsonString() }},\n\"messages\":[\n{\"type\":\"text\",\n\"text\":{{ $json.output.toJsonString() }}}\n]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "9497f933-951e-4c5d-9ccd-323400fe7ba8",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "creations-forecasts-entries-solution.trycloudflare.com",
+            "user-agent": "LineBotWebhook/2.0",
+            "content-length": "622",
+            "accept-encoding": "gzip",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "147.92.149.170",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "JP",
+            "cf-ray": "9910e740d6edd78b-SIN",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "330279aa-c7e0-48c7-81be-e5767621004f",
+            "cf-worker": "trycloudflare.com",
+            "connection": "keep-alive",
+            "content-type": "application/json; charset=utf-8",
+            "x-forwarded-for": "147.92.149.170",
+            "x-forwarded-proto": "https",
+            "x-line-signature": "VIyJJonqRt2H3hm2wrS5UoI+i5iZI+4m6VrkerpRtWs="
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "destination": "U348aff501a776c5d90c314be423598a3",
+            "events": [
+              {
+                "type": "message",
+                "message": {
+                  "type": "text",
+                  "id": "583934672846192845",
+                  "quoteToken": "cNHBYcRYCN3R8AfbAFXVurKqB1_bXZPlbRwEpL5pgOHXbaF3TxdN-e4CDzToAWEjesPqfbjg23FNO1H6Wklr-KK-ByvQqhiGO0-INKtKKIzHI1I4izWLeccCU-L_kCiRQfFU2aQMlVqhGoqVM4IkLw",
+                  "text": "ยกเลิกวิชาวันที่เท่าไร"
+                },
+                "webhookEventId": "01K7YDBGXCMPJT8HVWCFV86WNC",
+                "deliveryContext": {
+                  "isRedelivery": false
+                },
+                "timestamp": 1760883491477,
+                "source": {
+                  "type": "user",
+                  "userId": "U84cb20e3c721537cfdd54c0ab11ad045"
+                },
+                "replyToken": "d1da873b73494a8b835dc71a3dc05c45",
+                "mode": "active"
+              }
+            ]
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/line-webhook",
+          "executionMode": "test"
+        }
+      }
+    ],
+    "AI Agent": [
+      {
+        "json": {
+          "output": "กำหนดการหมดเขตขอยกเลิกวิชาเรียน (ถอนติด W) คือวันที่ 20/10/2025 ค่ะ"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Data": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cd27ba10-0f3d-4a94-be06-9cb2894f9cf5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6eab26b7abdd3802d32d44c3534d2ca2bd1967bbbb8104abf74493d13a567124"
+  },
+  "id": "mvaXswLxz2N0D3QB",
+  "tags": []
+}

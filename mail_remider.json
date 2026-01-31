@@ -1,0 +1,228 @@
+{
+  "name": "mail_remider",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        -16
+      ],
+      "id": "bd086406-082d-43a4-9541-1c8a5fd9ee6d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM",
+          "mode": "list",
+          "cachedResultName": "events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "date",
+              "lookupValue": "={{ $today.plus({days: 5}).format(\"MM/dd/yyyy\") }}"
+            },
+            {
+              "lookupColumn": "isDone",
+              "lookupValue": "0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        112,
+        -16
+      ],
+      "id": "3e4c9c33-8366-48af-9fae-f5c213ec477c",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GhlFllPfjRrN60Vn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "664234011@parichat.skru.ac.th",
+        "subject": "=แจ้งเตือน : {{ $json.event }}",
+        "emailType": "text",
+        "message": "={{ $json.event }} ในวันที่ {{ DateTime.fromFormat($json.date, 'MM/dd/yyyy').toFormat('dd LLL yyyy') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -16
+      ],
+      "id": "b4ca6bce-0e58-43fb-8e6f-a4a99215d14e",
+      "name": "Send a message",
+      "webhookId": "a7827a7a-01cd-447c-82a4-2f7f0708697e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gSkLyE4gMlfq2m5p",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM",
+          "mode": "list",
+          "cachedResultName": "events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qSYvLmeNfZnUTQSB_hpbK1rnzUvdn_-cnyr3dsv78CM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}",
+            "isDone": "1"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isDone",
+              "displayName": "isDone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        -16
+      ],
+      "id": "b2a2580c-fded-4463-a6ad-50dd4ad7d394",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GhlFllPfjRrN60Vn",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Bangkok",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "f223c6de-6895-4e00-8dee-fd1894f4fc56",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6eab26b7abdd3802d32d44c3534d2ca2bd1967bbbb8104abf74493d13a567124"
+  },
+  "id": "ryorRtFFqAWZ7FCk",
+  "tags": []
+}
